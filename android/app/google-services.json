@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "7698177029",
+    "project_id": "aqualog-1adf4",
+    "storage_bucket": "aqualog-1adf4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:7698177029:android:af6af340ad9b0f7755d06c",
+        "android_client_info": {
+          "package_name": "com.example.aqualog"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRpnyTpoZS6f6aKTuS13EDCjp5lSxUOn0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
