@@ -40,6 +40,16 @@ class AddDiveBloc extends Bloc<AddDiveEvent, AddDiveState> {
     
     // Submission handler
     on<AddDiveSubmitted>(_onSubmitted);
+    
+    on<AddDiveLocalImageRemoved>((event, emit) {
+      final updatedPaths = List<String>.from(state.localImagePaths)..remove(event.path);
+      emit(state.copyWith(localImagePaths: updatedPaths));
+    });
+
+    on<AddDiveExistingImageRemoved>((event, emit) {
+      final updatedUrls = List<String>.from(state.existingPhotoUrls)..remove(event.url);
+      emit(state.copyWith(existingPhotoUrls: updatedUrls));
+    });
   }
 
   /// Returns true if the BLoC was initialized with an existing dive (Edit Mode).

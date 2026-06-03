@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +5,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../dives/models/dive_model.dart';
 import 'add_dive_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../dives/repository/dive_repository.dart';
 
 // UI Constants
 const Color primaryColor = Color(0xFF0A192F);
@@ -29,147 +30,194 @@ class DiveDetailScreen extends StatelessWidget {
     );
   }
 
-  @override
+@override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: primaryColor,
-      appBar: AppBar(
-        title: Text(dive.place, style: const TextStyle(color: textColor)),
-        backgroundColor: cardColor,
-        iconTheme: const IconThemeData(color: accentColor),
-        actions: [
-          IconButton(
-            key: const Key('diveDetailScreen_edit_iconButton'),
-            icon: const Icon(Icons.edit, color: accentColor),
-            onPressed: () {
-              Navigator.of(context).push(AddDiveScreen.route(initialDive: dive));
-            },
-          )
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          // 1. Date Header
-          Center(
-            child: Text(
-              DateFormat('EEEE, dd MMMM yyyy').format(dive.date),
-              style: const TextStyle(color: hintColor, fontSize: 18),
-            ),
-          ),
-          const SizedBox(height: 24),
+    // Envolvemos la pantalla en un StreamBuilder que escucha a Firestore
+    return StreamBuilder<Dive?>(
+      // Accedemos a la función que acabamos de crear en el repositorio
+      stream: RepositoryProvider.of<DiveRepository>(context).getDiveStream(dive.id),
+      initialData: dive, // Usamos la inmersión original para evitar un parpadeo de carga
+      builder: (context, snapshot) {
+        
+        // Si por algún motivo no hay datos (ej. se borró)
+        if (!snapshot.hasData || snapshot.data == null) {
+          return const Scaffold(
+            backgroundColor: primaryColor,
+            body: Center(child: CircularProgressIndicator(color: accentColor)),
+          );
+        }
 
-          // 2. Media Gallery
-          if (dive.photos.isNotEmpty) ...[
-            SizedBox(
-              height: 200,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: dive.photos.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.only(right: 12),
-                    width: 250,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: hintColor.withOpacity(0.3)),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: _buildImage(dive.photos[index]),
-                    ),
-                  );
+        // Esta es nuestra inmersión ACTUALIZADA en tiempo real
+        final currentDive = snapshot.data!;
+
+        return Scaffold(
+          backgroundColor: primaryColor,
+          appBar: AppBar(
+            title: Text(currentDive.place, style: const TextStyle(color: textColor)),
+            backgroundColor: cardColor,
+            iconTheme: const IconThemeData(color: accentColor),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.edit, color: accentColor),
+                onPressed: () {
+                  // Le pasamos la inmersión actualizada al formulario
+                  Navigator.of(context).push(AddDiveScreen.route(initialDive: currentDive));
                 },
+              )
+            ],
+          ),
+          body: ListView(
+            padding: const EdgeInsets.all(16.0),
+            children: [
+              // 1. FECHA
+              Center(
+                child: Text(
+                  DateFormat('EEEE, dd MMMM yyyy').format(currentDive.date),
+                  style: const TextStyle(color: hintColor, fontSize: 18),
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-          ],
+              const SizedBox(height: 24),
 
-          // 3. Key Metrics
-          _buildSectionTitle('Dive Data'),
-          _buildDetailCard(
-            children: [
-              _DetailRow(icon: Icons.waves, label: 'Depth', value: '${dive.depth} m'),
-              _DetailRow(icon: Icons.timer, label: 'Bottom Time', value: '${dive.time} min'),
+              // 2. GALERÍA DE FOTOS (Actualizada con zoom)
+              if (currentDive.photos.isNotEmpty) ...[
+                SizedBox(
+                  height: 200,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: currentDive.photos.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () => _showFullScreenImage(context, currentDive.photos[index]),
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 12),
+                          width: 250,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: hintColor.withOpacity(0.3)),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: _buildImage(currentDive.photos[index]),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+
+              // 3. PARÁMETROS PRINCIPALES
+              _buildSectionTitle('Datos de la Inmersión'),
+              _buildDetailCard(
+                children: [
+                  _DetailRow(icon: Icons.waves, label: 'Profundidad', value: '${currentDive.depth} m'),
+                  _DetailRow(icon: Icons.timer, label: 'Tiempo', value: '${currentDive.time} min'),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // 4. UBICACIÓN (MAPA ESTÁTICO)
+              if (currentDive.latitude != null && currentDive.longitude != null) ...[
+                _buildSectionTitle('Ubicación'),
+                const SizedBox(height: 8),
+                _buildMapPreview(currentDive.latitude!, currentDive.longitude!), // Actualizado abajo
+                const SizedBox(height: 24),
+              ],
+
+              // 5. CONDICIONES
+              _buildSectionTitle('Condiciones'),
+              _buildDetailCard(
+                children: [
+                  _DetailRow(icon: Icons.visibility, label: 'Visibilidad', value: currentDive.visibility),
+                  _DetailRow(icon: Icons.compare_arrows, label: 'Corriente', value: currentDive.current),
+                  _DetailRow(
+                      icon: Icons.thermostat,
+                      label: 'Temperatura',
+                      value: currentDive.waterTemp != null ? '${currentDive.waterTemp} ºC' : null),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // 6. COMPAÑERO Y NOTAS
+              _buildSectionTitle('Notas y Compañía'),
+              _buildDetailCard(
+                children: [
+                  _DetailRow(icon: Icons.person, label: 'Compañero', value: currentDive.buddy),
+                  _DetailRow(icon: Icons.subject, label: 'Notas', value: currentDive.notes, isMultiLine: true),
+                ],
+              ),
+              
+              const SizedBox(height: 40),
             ],
           ),
-          const SizedBox(height: 24),
-
-          // 4. Location Preview
-          if (dive.latitude != null && dive.longitude != null) ...[
-            _buildSectionTitle('Location'),
-            const SizedBox(height: 8),
-            _buildMapPreview(),
-            const SizedBox(height: 24),
-          ],
-
-          // 5. Environmental Conditions
-          _buildSectionTitle('Conditions'),
-          _buildDetailCard(
-            children: [
-              _DetailRow(icon: Icons.visibility, label: 'Visibility', value: dive.visibility),
-              _DetailRow(icon: Icons.compare_arrows, label: 'Current', value: dive.current),
-              _DetailRow(
-                  icon: Icons.thermostat,
-                  label: 'Water Temp',
-                  value: dive.waterTemp != null ? '${dive.waterTemp} ºC' : null),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // 6. Social & Notes
-          _buildSectionTitle('Buddy & Notes'),
-          _buildDetailCard(
-            children: [
-              _DetailRow(icon: Icons.person, label: 'Buddy', value: dive.buddy),
-              _DetailRow(icon: Icons.subject, label: 'Notes', value: dive.notes, isMultiLine: true),
-            ],
-          ),
-          
-          const SizedBox(height: 40),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  // --- HELPER WIDGETS ---
-
-  /// Renders images supporting Network URLs, Base64 strings, and Local Files.
-  /// 
-  /// Note: Base64 decoding is handled here to support the current Firestore implementation
-  /// without external storage buckets. In a production app with heavy media, 
-  /// this logic would delegate to a cached network image provider.
-  Widget _buildImage(String imagePath) {
+Widget _buildImage(String imagePath) {
+    // Si la ruta empieza por http, es una URL de ImgBB (foto guardada)
     if (imagePath.startsWith('http')) {
       return Image.network(
         imagePath,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.error, color: Colors.red)),
+        // Mostramos un indicador de carga mientras la imagen baja de internet
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(
+            child: CircularProgressIndicator(color: accentColor),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => const Center(
+          child: Icon(Icons.broken_image, color: Colors.white54),
+        ),
       );
-    } else if (imagePath.startsWith('data:image')) {
-      try {
-        final base64String = imagePath.split(',').last;
-        return Image.memory(
-          base64Decode(base64String),
-          fit: BoxFit.cover,
-          gaplessPlayback: true,
-        );
-      } catch (e) {
-        return const Center(child: Icon(Icons.broken_image, color: Colors.white54));
-      }
     } else {
+      // Fallback: Si no empieza por http, asumimos que es una ruta local del teléfono
+      // (Por ejemplo, cuando previsualizas antes de guardar)
       return Image.file(File(imagePath), fit: BoxFit.cover);
     }
+  }
+
+  void _showFullScreenImage(BuildContext context, String imagePath) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.zero, // Para que ocupe toda la pantalla
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // El widget mágico para hacer Zoom
+            InteractiveViewer(
+              panEnabled: true, // Permitir mover la foto
+              minScale: 1.0,
+              maxScale: 4.0,    // Zoom máximo de 4x
+              child: _buildImage(imagePath),
+            ),
+            // Botón de cerrar en la esquina superior derecha
+            Positioned(
+              top: 40,
+              right: 20,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// Renders a static Google Map (Lite Mode).
   /// 
   /// Lite Mode is chosen to reduce memory usage and API costs, 
   /// as the user does not need to interact with the map in this preview view.
-  Widget _buildMapPreview() {
-    final lat = dive.latitude!;
-    final lng = dive.longitude!;
+  Widget _buildMapPreview(double lat, double lng) {
     final position = LatLng(lat, lng);
+
 
     return Container(
       height: 200,

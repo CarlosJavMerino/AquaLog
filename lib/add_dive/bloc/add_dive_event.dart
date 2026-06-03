@@ -102,3 +102,17 @@ class AddDiveLocationChanged extends AddDiveEvent {
 class AddDiveSubmitted extends AddDiveEvent {
   const AddDiveSubmitted();
 }
+
+class AddDiveLocalImageRemoved extends AddDiveEvent {
+  final String path;
+  const AddDiveLocalImageRemoved(this.path);
+  @override
+  List<Object?> get props => [path];
+}
+
+class AddDiveExistingImageRemoved extends AddDiveEvent {
+  final String url;
+  const AddDiveExistingImageRemoved(this.url);
+  @override
+  List<Object?> get props => [url];
+}

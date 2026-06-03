@@ -1,21 +1,22 @@
-import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/dive_model.dart';
 
-/// Repository responsible for managing Dive data interactions with Firebase Firestore.
-/// 
-/// Follows the Repository pattern to abstract the data source implementation 
-/// from the business logic.
+/// Repository responsible for managing Dive data interactions with Firebase Firestore
+/// y la subida de imágenes a través de la API gratuita de ImgBB.
 class DiveRepository {
   final CollectionReference _divesCollection = FirebaseFirestore.instance.collection('dives');
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  
+  // Cliente HTTP para enviar las fotos
+  final Dio _dio = Dio();
+  
+  // TODO: Reemplaza esto por tu API Key real de ImgBB
+  final String _imgbbApiKey = 'e1f35d44f21d9fa4e31cd33a2e25e107';
 
   /// Retrieves a real-time stream of the current user's dives.
-  /// 
-  /// Returns an empty stream if no user is logged in.
-  /// Ordered by date descending (newest first).
   Stream<List<Dive>> getDives() {
     final userId = _auth.currentUser?.uid;
     if (userId == null) return Stream.value([]);
@@ -30,34 +31,43 @@ class DiveRepository {
     });
   }
 
-  /// Processes local images and converts them to Base64 strings.
-  /// 
-  /// ARCHITECTURAL DECISION:
-  /// For this MVP/Portfolio project, images are stored as Base64 strings directly 
-  /// in the Firestore document to avoid the complexity and cost of Firebase Storage.
-  /// 
-  /// Note: In a production environment with high-res images, this should be refactored 
-  /// to upload files to a bucket (S3/Firebase Storage) and store only URLs here.
-  /// Additionally, image compression should be handled in a separate Isolate.
+  /// Sube las imágenes físicas a ImgBB y devuelve una lista con las URLs web
   Future<List<String>> uploadImages(List<String> imagePaths) async {
-    List<String> base64Images = [];
+    List<String> uploadedUrls = [];
 
     for (String path in imagePaths) {
       try {
         final file = File(path);
         if (!await file.exists()) continue;
 
-        final bytes = await file.readAsBytes();
-        String base64String = base64Encode(bytes);
-        
-        // Appends the data URI scheme for easy rendering in Flutter
-        base64Images.add('data:image/jpeg;base64,$base64String');
+        // 1. Preparamos el archivo para enviarlo a la API
+        String fileName = file.path.split('/').last;
+        FormData formData = FormData.fromMap({
+          'key': _imgbbApiKey,
+          'image': await MultipartFile.fromFile(file.path, filename: fileName),
+        });
+
+        // 2. Hacemos la petición POST a ImgBB
+        final response = await _dio.post(
+          'https://api.imgbb.com/1/upload',
+          data: formData,
+        );
+
+        // 3. Si la subida es exitosa, extraemos la URL y la guardamos
+        if (response.statusCode == 200 && response.data['success'] == true) {
+          String imageUrl = response.data['data']['url'];
+          uploadedUrls.add(imageUrl); // Añadimos la URL limpia (Ej: https://i.ibb.co/...)
+        } else {
+          print('Error de ImgBB: ${response.data}');
+        }
       } catch (e) {
-        // Logging the error internally, but allowing the process to continue for other images
-        print('Error encoding image $path: $e');
+        // Registramos el error pero permitimos que el bucle continúe
+        // por si el usuario subió varias fotos y solo falla una.
+        print('Error al subir la imagen $path: $e');
       }
     }
-    return base64Images;
+    
+    return uploadedUrls;
   }
 
   /// Persists a new dive to the database.
@@ -116,5 +126,13 @@ class DiveRepository {
     } catch (e) {
       rethrow;
     }
+  }
+
+  /// Obtiene un Stream en tiempo real de una única inmersión por su ID
+  Stream<Dive?> getDiveStream(String diveId) {
+    return _divesCollection.doc(diveId).snapshots().map((snap) {
+      if (!snap.exists) return null; // Por si se borra la inmersión
+      return Dive.fromSnapshot(snap);
+    });
   }
 }

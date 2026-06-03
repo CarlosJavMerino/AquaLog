@@ -1,4 +1,5 @@
-import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart'; 
@@ -71,29 +72,28 @@ class _GlobalMapScreenState extends State<GlobalMapScreen> {
     return markers;
   }
 
-  /// Helper to render images handling both Base64 strings (local storage optimization)
-  /// and HTTP URLs (legacy or remote storage).
-  Widget _buildImage(String imagePath) {
-    try {
-      if (imagePath.startsWith('data:image')) {
-        final base64String = imagePath.split(',').last;
-        return Image.memory(
-          base64Decode(base64String),
-          fit: BoxFit.cover,
-          gaplessPlayback: true,
-          errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.error, color: Colors.red)),
-        );
-      } else if (imagePath.startsWith('http')) {
-        return Image.network(
-          imagePath,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image, color: Colors.white54)),
-        );
-      }
-    } catch (e) {
-      return const Center(child: Icon(Icons.error_outline, color: Colors.red));
+Widget _buildImage(String imagePath) {
+    // Si la ruta empieza por http, es una URL de ImgBB (foto guardada)
+    if (imagePath.startsWith('http')) {
+      return Image.network(
+        imagePath,
+        fit: BoxFit.cover,
+        // Mostramos un indicador de carga mientras la imagen baja de internet
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(
+            child: CircularProgressIndicator(color: accentColor),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => const Center(
+          child: Icon(Icons.broken_image, color: Colors.white54),
+        ),
+      );
+    } else {
+      // Fallback: Si no empieza por http, asumimos que es una ruta local del teléfono
+      // (Por ejemplo, cuando previsualizas antes de guardar)
+      return Image.file(File(imagePath), fit: BoxFit.cover);
     }
-    return const Center(child: Icon(Icons.image_not_supported, color: hintColor));
   }
 
   /// Displays a summary BottomSheet when a marker is clicked.

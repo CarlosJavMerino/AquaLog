@@ -360,8 +360,16 @@ class _PhotoPicker extends StatelessWidget {
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
-                ...state.existingPhotoUrls.map((url) => _Thumbnail(image: NetworkImage(url))),
-                ...state.localImagePaths.map((path) => _Thumbnail(image: FileImage(File(path)))),
+                ...state.existingPhotoUrls.map((url) => _Thumbnail(
+                      image: NetworkImage(url),
+                      // EVENTO: Borrar foto ya guardada
+                      onRemove: () => context.read<AddDiveBloc>().add(AddDiveExistingImageRemoved(url)),
+                    )),
+                ...state.localImagePaths.map((path) => _Thumbnail(
+                      image: FileImage(File(path)),
+                      // EVENTO: Borrar foto local recién elegida
+                      onRemove: () => context.read<AddDiveBloc>().add(AddDiveLocalImageRemoved(path)),
+                    )),
               ],
             ),
           ),
@@ -372,16 +380,39 @@ class _PhotoPicker extends StatelessWidget {
 
 class _Thumbnail extends StatelessWidget {
   final ImageProvider image;
-  const _Thumbnail({required this.image});
+  final VoidCallback onRemove; // <-- Nuevo parámetro
+
+  const _Thumbnail({required this.image, required this.onRemove});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image(image: image, width: 100, height: 100, fit: BoxFit.cover),
-      ),
+    return Stack(
+      children: [
+        // La imagen con un poco de margen arriba y a la derecha para que quepa la X
+        Padding(
+          padding: const EdgeInsets.only(right: 12.0, top: 8.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image(image: image, width: 90, height: 90, fit: BoxFit.cover),
+          ),
+        ),
+        // Botón circular rojo con la X
+        Positioned(
+          top: 0,
+          right: 4,
+          child: GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Colors.redAccent,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, size: 16, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -136,9 +136,9 @@ class _UsernameInputState extends State<_UsernameInput> {
     return TextField(
       controller: _controller,
       onChanged: (val) => context.read<LoginBloc>().add(LoginUsernameChanged(val)),
-      style: const TextStyle(color: textColor),
+      style: const TextStyle(color: Color.fromARGB(91, 255, 255, 255)),
       keyboardType: TextInputType.text,
-      decoration: _inputDecoration('Username', 'e.g. diver_master'),
+      decoration: _inputDecoration('Username', ''),
     );
   }
 }
