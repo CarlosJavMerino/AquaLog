@@ -15,12 +15,14 @@ class GearSearchService {
     if (_useMockData) return _getMockData(query);
 
     try {
+      final String refinedQuery = '$query scuba diving gear OR equipo de buceo';
+
       final response = await _dio.get(
         'https://www.googleapis.com/customsearch/v1',
         queryParameters: {
           'key': _apiKey,
           'cx': _searchEngineId,
-          'q': query,
+          'q': refinedQuery,
         },
       );
 
