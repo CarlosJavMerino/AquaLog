@@ -5,7 +5,7 @@ import 'package:aqualog/register/bloc/register_bloc.dart';
 import 'package:aqualog/register/bloc/register_event.dart';
 import 'package:aqualog/register/bloc/register_state.dart';
 
-// UI Constants
+// Colores
 const Color primaryColor = Color(0xFF0A192F);
 const Color accentColor = Color(0xFF48E3D4);
 const Color textColor = Colors.white;
@@ -23,7 +23,7 @@ class RegisterScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: primaryColor,
       appBar: AppBar(
-        title: const Text('Create Account'),
+        title: const Text('Crear Cuenta'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: textColor,
@@ -32,13 +32,12 @@ class RegisterScreen extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: BlocProvider(
-            // Dependency Injection: Injecting Repository into the local BLoC
             create: (context) {
               return RegisterBloc(
                 authRepository: RepositoryProvider.of<AuthRepository>(context),
               );
             },
-            child: const _RegisterForm(),
+            child: const RegisterForm(),
           ),
         ),
       ),
@@ -46,12 +45,11 @@ class RegisterScreen extends StatelessWidget {
   }
 }
 
-class _RegisterForm extends StatelessWidget {
-  const _RegisterForm();
+class RegisterForm extends StatelessWidget {
+  const RegisterForm({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Reactive Feedback: Listening to state changes for side effects (Navigation/Snackbars)
     return BlocListener<RegisterBloc, RegisterState>(
       listenWhen: (previous, current) => previous.formStatus != current.formStatus,
       listener: (context, state) {
@@ -75,6 +73,7 @@ class _RegisterForm extends StatelessWidget {
                 behavior: SnackBarBehavior.floating,
                 margin: const EdgeInsets.all(20),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                duration: const Duration(seconds: 4),
               ),
             );
         }
@@ -85,7 +84,7 @@ class _RegisterForm extends StatelessWidget {
         children: [
           const SizedBox(height: 20),
           const Text(
-            'Welcome to AquaLog',
+            'Bienvenido a AquaLog',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: textColor,
@@ -93,14 +92,16 @@ class _RegisterForm extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+          const SizedBox(height: 8),
+          // --- CAMBIO: Texto explicativo para el uso del email real ---
           const Text(
-            'Create a user profile to start logging',
+            'Usa un email real para poder recuperar tu cuenta si olvidas la contraseña.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: hintColor, fontSize: 16),
+            style: TextStyle(color: hintColor, fontSize: 14),
           ),
           const SizedBox(height: 40),
           
-          const _UsernameInput(),
+          const _EmailInput(), // --- CAMBIO: Sustituimos Usuario por Email ---
           const SizedBox(height: 20),
           const _PasswordInput(),
           
@@ -112,40 +113,107 @@ class _RegisterForm extends StatelessWidget {
   }
 }
 
-class _UsernameInput extends StatelessWidget {
-  const _UsernameInput();
+// --- CAMBIO: Clase adaptada para el Email ---
+class _EmailInput extends StatefulWidget {
+  const _EmailInput();
+  @override
+  State<_EmailInput> createState() => _EmailInputState();
+}
+
+class _EmailInputState extends State<_EmailInput> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Nota: Seguimos usando state.username del bloc por debajo para no romper el resto de la app
+    _controller = TextEditingController(text: context.read<RegisterBloc>().state.username);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      controller: _controller,
       onChanged: (val) {
         context.read<RegisterBloc>().add(RegisterUsernameChanged(val));
       },
       style: const TextStyle(color: textColor),
-      keyboardType: TextInputType.text,
-      decoration: _inputDecoration('Username', 'e.g. diver_pro'),
+      keyboardType: TextInputType.emailAddress, // --- CAMBIO: Muestra el teclado con la '@'
+      decoration: InputDecoration(
+        labelText: 'Correo Electrónico',
+        hintText: 'ejemplo@correo.com',
+        labelStyle: const TextStyle(color: hintColor),
+        prefixIcon: const Icon(Icons.email, color: hintColor), // --- CAMBIO: Icono de email
+        filled: true,
+        fillColor: primaryColor.withOpacity(0.5),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: hintColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: accentColor, width: 2),
+        ),
+      ),
     );
   }
 }
 
-class _PasswordInput extends StatelessWidget {
+class _PasswordInput extends StatefulWidget {
   const _PasswordInput();
+  @override
+  State<_PasswordInput> createState() => _PasswordInputState();
+}
 
+class _PasswordInputState extends State<_PasswordInput> {
+  late TextEditingController _controller;
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: context.read<RegisterBloc>().state.password);
+  }
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return TextField(
+      controller: _controller,
       onChanged: (password) =>
           context.read<RegisterBloc>().add(RegisterPasswordChanged(password)),
       obscureText: true,
       style: const TextStyle(color: textColor),
-      decoration: _inputDecoration('Password', 'Min. 6 characters'),
+      decoration: InputDecoration(
+        labelText: 'Contraseña',
+        labelStyle: const TextStyle(color: hintColor),
+        prefixIcon: const Icon(Icons.lock, color: hintColor), // Añadido para consistencia con el email
+        helperText: 'Debe tener al menos 6 caracteres',
+        helperStyle: const TextStyle(color: hintColor),
+        filled: true,
+        fillColor: primaryColor.withOpacity(0.5),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: hintColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: accentColor, width: 2),
+        ),
+      ),
     );
   }
 }
 
 class _RegisterButton extends StatelessWidget {
   const _RegisterButton();
-  
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<RegisterBloc, RegisterState>(
@@ -166,7 +234,7 @@ class _RegisterButton extends StatelessWidget {
                   }
                 },
                 child: const Text(
-                  'Sign Up',
+                  'Registrarse',
                   style: TextStyle(
                     color: primaryColor,
                     fontSize: 18,
@@ -177,24 +245,4 @@ class _RegisterButton extends StatelessWidget {
       },
     );
   }
-}
-
-// Helper method for consistent styling
-InputDecoration _inputDecoration(String label, String hint) {
-  return InputDecoration(
-    labelText: label,
-    hintText: hint,
-    hintStyle: const TextStyle(color: Colors.white24),
-    labelStyle: const TextStyle(color: hintColor),
-    filled: true,
-    fillColor: primaryColor.withOpacity(0.5),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: hintColor),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: accentColor, width: 2),
-    ),
-  );
 }

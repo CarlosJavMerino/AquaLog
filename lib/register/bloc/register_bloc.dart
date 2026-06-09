@@ -29,22 +29,14 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
 
   Future<void> _onSubmitted(RegisterSubmitted event, Emitter<RegisterState> emit) async {
     if (state.formStatus == FormStatus.submissionInProgress) return;
-    
     emit(state.copyWith(formStatus: FormStatus.submissionInProgress));
-    
     try {
-      // IMPLEMENTATION DETAIL:
-      // To support a username-based flow while using Firebase Email/Password provider,
-      // we construct a synthetic email address using a fixed domain.
-      final fakeEmail = '${state.username.trim()}@aqualog.app';
-
+      // USAMOS EL EMAIL REAL LIMPIO
       await _authRepository.signUp(
-        email: fakeEmail,
+        email: state.username.trim(),
         password: state.password,
       );
-      
       emit(state.copyWith(formStatus: FormStatus.submissionSuccess));
-
     } on FirebaseAuthException catch (e) {
       // Mapping Firebase error codes to user-friendly messages
       String readableError;

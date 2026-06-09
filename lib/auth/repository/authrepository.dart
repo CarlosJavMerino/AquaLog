@@ -54,4 +54,15 @@ class AuthRepository {
       rethrow;
     }
   }
+
+  // Nueva función para recuperar contraseña
+  Future<void> resetPassword({required String email}) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      print('Error enviando email de recuperación: $e');
+      // No lanzamos rethrow para evitar crashear la UI si el email no existe,
+      // Firebase aconseja no confirmar si un email existe o no por seguridad.
+    }
+  }
 }
