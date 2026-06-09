@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../models/gear_search_result.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GearSearchService {
   final Dio _dio = Dio();
@@ -7,8 +8,8 @@ class GearSearchService {
   // API CONFIGURATION
   // In a production environment, these keys should be stored in .env files using flutter_dotenv
   // or passed via --dart-define during build to avoid committing secrets to version control.
-  final String _apiKey = 'AIzaSyAGX-CxVogX6DvJ2PSF351_YXuhZvFAgSw'; 
-  final String _searchEngineId = 'd4d6905a61cc04830'; 
+  final String _apiKey = dotenv.get('GOOGLE_SEARCH_API_KEY'); 
+  final String _searchEngineId = dotenv.get('GOOGLE_SEARCH_ENGINE_ID'); 
   final bool _useMockData = false; 
 
   Future<List<GearSearchResult>> searchGear(String query) async {

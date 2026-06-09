@@ -9,9 +9,13 @@ import 'package:aqualog/screens/login_screen.dart';
 import 'package:aqualog/screens/splash_screen.dart';
 import 'package:aqualog/firebase_options.dart';
 import 'package:aqualog/dives/repository/dive_repository.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  await dotenv.load(fileName: ".env");
   
   // Initialize Firebase with platform-specific options
   await Firebase.initializeApp(

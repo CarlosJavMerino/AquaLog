@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/dive_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Repository responsible for managing Dive data interactions with Firebase Firestore
 /// y la subida de imágenes a través de la API gratuita de ImgBB.
@@ -14,7 +15,7 @@ class DiveRepository {
   final Dio _dio = Dio();
   
   // TODO: Reemplaza esto por tu API Key real de ImgBB
-  final String _imgbbApiKey = 'e1f35d44f21d9fa4e31cd33a2e25e107';
+  final String _imgbbApiKey = dotenv.get('IMGBB_API_KEY');
 
   /// Retrieves a real-time stream of the current user's dives.
   Stream<List<Dive>> getDives() {
