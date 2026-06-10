@@ -10,6 +10,9 @@ import 'package:aqualog/screens/splash_screen.dart';
 import 'package:aqualog/firebase_options.dart';
 import 'package:aqualog/dives/repository/dive_repository.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:aqualog/gear/repository/gear_repository.dart';
+import 'package:aqualog/gear/services/gear_search_service.dart';
+import 'package:aqualog/weather/services/weather_service.dart';
 
 
 Future<void> main() async {
@@ -42,6 +45,10 @@ class AquaLogApp extends StatelessWidget {
       providers: [
         RepositoryProvider.value(value: _authRepository),
         RepositoryProvider(create: (context) => DiveRepository()),
+
+        RepositoryProvider(create: (context) => GearRepository()),
+        RepositoryProvider(create: (context) => GearSearchService()),
+        RepositoryProvider(create: (context) => WeatherService()),
       ],
       child: BlocProvider(
         // The AuthBloc is global because the auth state affects the whole app lifecycle

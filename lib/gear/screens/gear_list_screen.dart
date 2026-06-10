@@ -26,8 +26,9 @@ class GearListScreen extends StatelessWidget {
     // We create the GearListBloc here and immediately request the data subscription.
     // This creates a scoped BLoC that will be disposed of automatically when the screen is closed.
     return BlocProvider(
-      create: (context) => GearListBloc(gearRepository: GearRepository())
-        ..add(const GearListSubscriptionRequested()),
+      create: (context) => GearListBloc(
+        gearRepository: RepositoryProvider.of<GearRepository>(context),
+      )..add(const GearListSubscriptionRequested()),
       child: const GearListView(),
     );
   }

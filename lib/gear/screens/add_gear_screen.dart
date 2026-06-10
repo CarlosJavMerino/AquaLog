@@ -37,12 +37,12 @@ class AddGearScreen extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) => GearSearchBloc(
-            searchService: GearSearchService(),
+            searchService: RepositoryProvider.of<GearSearchService>(context),
           ),
         ),
         BlocProvider(
           create: (context) => AddGearBloc(
-            gearRepository: GearRepository(),
+            gearRepository: RepositoryProvider.of<GearRepository>(context),
           ),
         ),
       ],

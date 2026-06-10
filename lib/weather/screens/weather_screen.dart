@@ -27,7 +27,7 @@ class WeatherScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => WeatherBloc(service: WeatherService()),
+      create: (context) => WeatherBloc(service: RepositoryProvider.of<WeatherService>(context),),
       child: const WeatherView(),
     );
   }
