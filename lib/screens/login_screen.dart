@@ -93,7 +93,7 @@ class _LoginForm extends StatelessWidget {
             TextButton(
               onPressed: () => Navigator.of(context).push(RegisterScreen.route()),
               child: const Text(
-                'New diver? Create an account', 
+                '¿Nuevo buceador? Crea una cuenta', 
                 style: TextStyle(color: accentColor)
               ),
             ),
@@ -124,7 +124,7 @@ class _PasswordInput extends StatelessWidget {
       onChanged: (val) => context.read<LoginBloc>().add(LoginPasswordChanged(val)),
       obscureText: true,
       style: const TextStyle(color: textColor),
-      decoration: _authDecoration('Password', Icons.lock),
+      decoration: _authDecoration('Contraseña', Icons.lock),
     );
   }
 }
@@ -146,7 +146,7 @@ class _LoginButton extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
       child: const Text(
-        'Log In', 
+        'Iniciar sesión', 
         style: TextStyle(
           color: primaryColor, 
           fontSize: 18, 

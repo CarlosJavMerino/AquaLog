@@ -97,10 +97,10 @@ class _HomeViewState extends State<HomeView> {
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
-          BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'Logbook'),
-          BottomNavigationBarItem(icon: Icon(Icons.scuba_diving), label: 'Gear'),
-          BottomNavigationBarItem(icon: Icon(Icons.sunny), label: 'Weather'),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Mapa'),
+          BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'Inmersiones'),
+          BottomNavigationBarItem(icon: Icon(Icons.scuba_diving), label: 'Equipo'),
+          BottomNavigationBarItem(icon: Icon(Icons.sunny), label: 'Clima'),
         ],
       ),
     );
@@ -108,10 +108,10 @@ class _HomeViewState extends State<HomeView> {
 
   String _getTitle(int index) {
     switch (index) {
-      case 0: return 'Global Map';
-      case 1: return 'My Logbook';
-      case 2: return 'My Gear';
-      case 3: return 'Conditions';
+      case 0: return 'Mapa';
+      case 1: return 'Mis Inmersiones';
+      case 2: return 'Mi Equipo';
+      case 3: return 'Clima';
       default: return 'AquaLog';
     }
   }
@@ -162,7 +162,7 @@ class _DiveLogbookContent extends StatelessWidget {
                   Icon(Icons.waves, size: 64, color: Colors.white24),
                   SizedBox(height: 16),
                   Text(
-                    'No dives recorded yet.\nTap + to add your first immersion!',
+                    'Aún no tienes inmersiones registradas.\n¡Toca + para agregar la primera!',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: hintColor, fontSize: 16),
                   ),

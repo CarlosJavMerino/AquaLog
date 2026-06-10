@@ -37,7 +37,7 @@ class AddDiveScreen extends StatelessWidget {
       backgroundColor: primaryColor,
       appBar: AppBar(
         title: Text(
-          initialDive == null ? 'Log New Dive' : 'Edit Dive', 
+          initialDive == null ? 'Registrar nueva inmersión' : 'Editar inmersión', 
           style: const TextStyle(color: textColor)
         ),
         backgroundColor: cardColor,
@@ -81,7 +81,7 @@ class _AddDiveForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildSectionHeader('Dive Details'),
+            _buildSectionHeader('Detalles de la inmersión'),
             const SizedBox(height: 16),
             const _PlaceInput(),
             const SizedBox(height: 12),
@@ -98,7 +98,7 @@ class _AddDiveForm extends StatelessWidget {
             const _DateInput(),
             
             const SizedBox(height: 24),
-            _buildSectionHeader('Conditions'),
+            _buildSectionHeader('Condiciones'),
             const SizedBox(height: 16),
             Row(
               children: const [
@@ -111,7 +111,7 @@ class _AddDiveForm extends StatelessWidget {
             const _CurrentInput(),
 
             const SizedBox(height: 24),
-            _buildSectionHeader('Notes & Media'),
+            _buildSectionHeader('Notas y medios'),
             const SizedBox(height: 16),
             const _BuddyInput(),
             const SizedBox(height: 12),
@@ -154,7 +154,7 @@ class _PlaceInput extends StatelessWidget {
     final state = context.watch<AddDiveBloc>().state;
     return TextFormField(
       initialValue: state.place,
-      decoration: _inputDecoration('Dive Site Name', Icons.place),
+      decoration: _inputDecoration('Nombre del lugar', Icons.place),
       style: const TextStyle(color: textColor),
       onChanged: (v) => context.read<AddDiveBloc>().add(AddDivePlaceChanged(v)),
     );
@@ -168,7 +168,7 @@ class _DepthInput extends StatelessWidget {
     final state = context.watch<AddDiveBloc>().state;
     return TextFormField(
       initialValue: state.depth,
-      decoration: _inputDecoration('Depth (m)', Icons.arrow_downward),
+      decoration: _inputDecoration('Profundidad (m)', Icons.arrow_downward),
       style: const TextStyle(color: textColor),
       keyboardType: TextInputType.number,
       onChanged: (v) => context.read<AddDiveBloc>().add(AddDiveDepthChanged(v)),
@@ -183,7 +183,7 @@ class _TimeInput extends StatelessWidget {
     final state = context.watch<AddDiveBloc>().state;
     return TextFormField(
       initialValue: state.time,
-      decoration: _inputDecoration('Time (min)', Icons.timer),
+      decoration: _inputDecoration('Tiempo (min)', Icons.timer),
       style: const TextStyle(color: textColor),
       keyboardType: TextInputType.number,
       onChanged: (v) => context.read<AddDiveBloc>().add(AddDiveTimeChanged(v)),
@@ -236,7 +236,7 @@ class _LocationSelector extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       leading: Icon(Icons.map, color: hasLocation ? accentColor : hintColor),
       title: Text(
-        hasLocation ? 'Location Set' : 'Set Location on Map',
+        hasLocation ? 'Ubicación establecida' : 'Marcar ubicación en el mapa',
         style: TextStyle(color: hasLocation ? accentColor : hintColor),
       ),
       subtitle: hasLocation 
@@ -282,7 +282,7 @@ class _VisibilityInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       initialValue: context.read<AddDiveBloc>().state.visibility,
-      decoration: _inputDecoration('Visibility', Icons.visibility),
+      decoration: _inputDecoration('Visibilidad', Icons.visibility),
       style: const TextStyle(color: textColor),
       onChanged: (v) => context.read<AddDiveBloc>().add(AddDiveVisibilityChanged(v)),
     );
@@ -295,7 +295,7 @@ class _CurrentInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       initialValue: context.read<AddDiveBloc>().state.current,
-      decoration: _inputDecoration('Current (e.g., Strong)', Icons.waves),
+      decoration: _inputDecoration('Corriente (p.ej., fuerte)', Icons.waves),
       style: const TextStyle(color: textColor),
       onChanged: (v) => context.read<AddDiveBloc>().add(AddDiveCurrentChanged(v)),
     );
@@ -308,7 +308,7 @@ class _BuddyInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       initialValue: context.read<AddDiveBloc>().state.buddy,
-      decoration: _inputDecoration('Buddy Name', Icons.person),
+      decoration: _inputDecoration('Nombre del compañero', Icons.person),
       style: const TextStyle(color: textColor),
       onChanged: (v) => context.read<AddDiveBloc>().add(AddDiveBuddyChanged(v)),
     );
@@ -321,7 +321,7 @@ class _NotesInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       initialValue: context.read<AddDiveBloc>().state.notes,
-      decoration: _inputDecoration('Notes / Observations', Icons.note).copyWith(
+      decoration: _inputDecoration('Notas / Observaciones', Icons.note).copyWith(
         alignLabelWithHint: true,
       ),
       style: const TextStyle(color: textColor),
@@ -350,7 +350,7 @@ class _PhotoPicker extends StatelessWidget {
             }
           },
           icon: const Icon(Icons.add_a_photo, color: accentColor),
-          label: const Text('Add Photos', style: TextStyle(color: textColor)),
+          label: const Text('Añadir fotos', style: TextStyle(color: textColor)),
           style: OutlinedButton.styleFrom(side: const BorderSide(color: hintColor)),
         ),
         if (state.localImagePaths.isNotEmpty || state.existingPhotoUrls.isNotEmpty)
@@ -436,7 +436,7 @@ class _SubmitButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
-      child: const Text('Save Dive Log', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      child: const Text('Guardar registro de inmersión', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
     );
   }
 }

@@ -13,7 +13,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:aqualog/gear/repository/gear_repository.dart';
 import 'package:aqualog/gear/services/gear_search_service.dart';
 import 'package:aqualog/weather/services/weather_service.dart';
-
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,6 +67,15 @@ class AppView extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'AquaLog',
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('es', 'ES'), // Español
+        Locale('en', 'US'), // Inglés (Fallback)
+      ],
       theme: ThemeData.dark().copyWith(
         primaryColor: const Color(0xFF0A192F),
         scaffoldBackgroundColor: const Color(0xFF0A192F),

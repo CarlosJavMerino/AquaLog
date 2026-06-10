@@ -76,7 +76,7 @@ class _AddGearView extends StatelessWidget {
         backgroundColor: primaryColor,
         appBar: AppBar(
           backgroundColor: cardColor,
-          title: const Text('Add New Gear', style: TextStyle(color: textColor)),
+          title: const Text('Agregar equipo nuevo', style: TextStyle(color: textColor)),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -84,7 +84,7 @@ class _AddGearView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // SECTION 1: AUTO-FILL SEARCH
-              const Text('Quick Search (Auto-fill)', 
+              const Text('Búsqueda rápida (autocompletar)', 
                   style: TextStyle(color: accentColor, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
               const _WebSearchSection(), 
@@ -92,7 +92,7 @@ class _AddGearView extends StatelessWidget {
               const Divider(color: hintColor, height: 40),
 
               // SECTION 2: GEAR DETAILS
-              const Text('Gear Details', 
+              const Text('Detalles del equipo', 
                   style: TextStyle(color: accentColor, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               const _GearImagePreview(),
@@ -104,7 +104,7 @@ class _AddGearView extends StatelessWidget {
               const _CategoryDropdown(),
               
               const SizedBox(height: 24),
-              const Text('Maintenance Schedule', 
+              const Text('Programa de mantenimiento', 
                   style: TextStyle(color: accentColor, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               
@@ -139,7 +139,7 @@ class _WebSearchSection extends StatelessWidget {
         // Search Input
         TextField(
           style: const TextStyle(color: textColor),
-          decoration: _inputDeco('e.g. Mares Puck Pro, Apeks XTX50...').copyWith(
+          decoration: _inputDeco('p.ej. Mares Puck Pro, Apeks XTX50...').copyWith(
              suffixIcon: const Icon(Icons.search, color: accentColor),
           ),
           onChanged: (value) {
@@ -293,7 +293,7 @@ class _BrandInputState extends State<_BrandInput> {
         controller: _controller,
         onChanged: (v) => context.read<AddGearBloc>().add(AddGearBrandChanged(v)),
         style: const TextStyle(color: textColor),
-        decoration: _inputDeco('Brand (e.g., Mares)'),
+        decoration: _inputDeco('Marca (p.ej., Mares)'),
       ),
     );
   }
@@ -339,7 +339,7 @@ class _ModelInputState extends State<_ModelInput> {
         controller: _controller,
         onChanged: (v) => context.read<AddGearBloc>().add(AddGearModelChanged(v)),
         style: const TextStyle(color: textColor),
-        decoration: _inputDeco('Model'),
+        decoration: _inputDeco('Modelo'),
       ),
     );
   }
@@ -355,7 +355,7 @@ class _CategoryDropdown extends StatelessWidget {
           value: state.category,
           dropdownColor: cardColor,
           style: const TextStyle(color: textColor),
-          decoration: _inputDeco('Category'),
+          decoration: _inputDeco('Categoría'),
           items: GearCategory.values.map((cat) {
             return DropdownMenuItem(
               value: cat,
@@ -378,7 +378,7 @@ class _PurchaseDateInput extends StatelessWidget {
     return BlocBuilder<AddGearBloc, AddGearState>(
       builder: (context, state) {
         return _DateButton(
-          label: 'Purchase Date',
+          label: 'Fecha de compra',
           date: state.purchaseDate,
           onPressed: () async {
             final d = await showDatePicker(
@@ -404,7 +404,7 @@ class _ServiceDateInput extends StatelessWidget {
     return BlocBuilder<AddGearBloc, AddGearState>(
       builder: (context, state) {
         return _DateButton(
-          label: 'Last Service',
+          label: 'Último servicio',
           date: state.lastServiceDate,
           onPressed: () async {
             final d = await showDatePicker(
@@ -439,7 +439,7 @@ class _SubmitButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
-          child: const Text('Add to Closet', 
+          child: const Text('Agregar al equipo', 
               style: TextStyle(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)),
         );
       },

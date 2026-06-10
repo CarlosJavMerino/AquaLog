@@ -57,7 +57,7 @@ class GearListView extends StatelessWidget {
           if (state.items.isEmpty) {
             return const Center(
               child: Text(
-                'Your gear locker is empty.\nAdd your equipment!',
+                'Tu casillero de equipo está vacío.\n¡Agrega tu equipo!',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: hintColor, fontSize: 18),
               ),
@@ -165,7 +165,7 @@ class _GearCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'Service: ${DateFormat('MM/yy').format(item.lastServiceDate!)}',
+                            'Servicio: ${DateFormat('MM/yy').format(item.lastServiceDate!)}',
                             style: TextStyle(
                               color: needsService ? warningColor : hintColor,
                               fontSize: 12,
