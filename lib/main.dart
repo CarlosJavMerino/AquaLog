@@ -14,6 +14,7 @@ import 'package:aqualog/gear/repository/gear_repository.dart';
 import 'package:aqualog/gear/services/gear_search_service.dart';
 import 'package:aqualog/weather/services/weather_service.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +24,11 @@ Future<void> main() async {
   // Initialize Firebase with platform-specific options
   await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true,
+    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
   );
 
   final authRepository = AuthRepository();

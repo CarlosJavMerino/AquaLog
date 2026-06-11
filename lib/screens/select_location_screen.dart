@@ -47,6 +47,10 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
 
     final position = await Geolocator.getCurrentPosition();
 
+    setState(() {
+      _pickedLocation = LatLng(position.latitude, position.longitude);
+    });
+    
     _mapController?.animateCamera(
       CameraUpdate.newLatLngZoom(
         LatLng(position.latitude, position.longitude),

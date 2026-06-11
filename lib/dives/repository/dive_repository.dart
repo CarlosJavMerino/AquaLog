@@ -52,22 +52,21 @@ class DiveRepository {
         final response = await _dio.post(
           'https://api.imgbb.com/1/upload',
           data: formData,
+          options: Options(receiveTimeout: const Duration(seconds: 5), sendTimeout: const Duration(seconds: 5))
         );
 
         // 3. Si la subida es exitosa, extraemos la URL y la guardamos
         if (response.statusCode == 200 && response.data['success'] == true) {
-          String imageUrl = response.data['data']['url'];
-          uploadedUrls.add(imageUrl); // Añadimos la URL limpia (Ej: https://i.ibb.co/...)
+          uploadedUrls.add(response.data['data']['url']); 
         } else {
-          print('Error de ImgBB: ${response.data}');
+          uploadedUrls.add(path);
         }
       } catch (e) {
-        // Registramos el error pero permitimos que el bucle continúe
-        // por si el usuario subió varias fotos y solo falla una.
-        print('Error al subir la imagen $path: $e');
+        print('Modo Offline o error de red. Guardando ruta local: $path');
+        // Si no hay red, guardamos la ruta local en la base de datos
+        uploadedUrls.add(path);
       }
     }
-    
     return uploadedUrls;
   }
 
